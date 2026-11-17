@@ -23,12 +23,15 @@ dbt reads the TPC-H share, materializes staging as views and marts as tables in 
 
 ## Layers
 
-| Layer | Folder | Materialization | Rule |
-|---|---|---|---|
-| Sources | `models/staging/sources.yml` | none | Declared once, referenced with `source()` for lineage |
-| Staging | `models/staging/` | view | Rename, type, deduplicate. No business logic |
-| Intermediate | `models/intermediate/` | ephemeral | Reusable rollups that are never queried directly |
-| Marts | `models/marts/` | table (`fct_sales` incremental) | Star schema and aggregates consumed by BI |
+The dbt layers map onto the usual Bronze, Silver, Gold vocabulary of a lakehouse: raw data as received, cleaned and conformed data, then business-ready models.
+
+
+| Layer | Medallion | Folder | Materialization | Rule |
+|---|---|---|---|---|
+| Sources | Bronze | `models/staging/sources.yml` | none | Declared once, referenced with `source()` for lineage |
+| Staging | Silver | `models/staging/` | view | Rename, type, deduplicate. No business logic |
+| Intermediate | Silver | `models/intermediate/` | ephemeral | Reusable rollups that are never queried directly |
+| Marts | Gold | `models/marts/` | table (`fct_sales` incremental) | Star schema and aggregates consumed by BI |
 
 Shared business logic lives in `macros/` (`calculate_net_revenue`). Calendar logic, including the steady-state month window (`is_complete_month`), is defined once in `dim_date` and reused downstream.
 

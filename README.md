@@ -5,11 +5,20 @@
 ![Snowflake](https://img.shields.io/badge/Snowflake-29B5E8)
 ![License: MIT](https://img.shields.io/badge/license-MIT-green)
 
+![Dashboard overview](docs/img/dashboard_overview.jpg)
+
 ## In short
 
 Which products, customers and months carry the gross margin? This repo delivers a tested dbt pipeline on Snowflake (TPC-H sample data), a star schema, and a Power BI dashboard on top of it. Overall gross margin is 64.9% on 218.1 bn of revenue across 6,001,215 order lines.
 
 > **FR :** Quels produits, clients et mois portent la marge brute ? Ce projet livre un pipeline dbt testé sur Snowflake (données TPC-H), un modèle en étoile et un dashboard Power BI. La marge brute globale est de 64,9 % sur 218,1 Md de chiffre d'affaires.
+
+## What this demonstrates
+
+- **ELT on Snowflake**: raw data transformed in the warehouse with dbt, from source tables to BI-ready models.
+- **Layered modeling (Bronze, Silver, Gold)**: raw sources, cleaned staging, then a star schema and aggregates for reporting.
+- **Data quality and CI/CD**: 52 automated data tests, a CI pipeline on every change and a full Snowflake build with an isolated, least-privilege identity.
+- **Business delivery**: a Power BI dashboard answering margin questions by product, customer and month.
 
 ## Business questions answered
 
@@ -26,13 +35,18 @@ Measured on 2026-11-17 on `SNOWFLAKE_SAMPLE_DATA.TPCH_SF1`, prod target.
 
 ![dbt lineage graph](docs/img/lineage.png)
 
-![Dashboard overview](docs/img/dashboard_overview.jpg)
-
 ![Dashboard products](docs/img/dashboard_products.jpg)
 
 ![Dashboard trend](docs/img/dashboard_trend.jpg)
 
 ## Architecture
+
+| Medallion layer | In this project | Content |
+|---|---|---|
+| Bronze | dbt sources | Raw TPC-H tables (`SNOWFLAKE_SAMPLE_DATA.TPCH_SF1`), read as-is |
+| Silver | `staging` (views) and `intermediate` (ephemeral) | Renamed, typed, deduplicated data, plus reusable rollups |
+| Gold | `marts` (tables) | Star schema (`fct_sales` + dimensions) and aggregates read by Power BI |
+
 
 ```mermaid
 flowchart LR
@@ -59,7 +73,8 @@ flowchart LR
 
 The intermediate model `int_customer_margin` rolls up `fct_sales` per customer and feeds the margin quintile of `dim_customer`. Environments, schema routing, security model and CI are described in [ARCHITECTURE.md](ARCHITECTURE.md).
 
-Models, with grain and materialization:
+<details>
+<summary>Models, with grain and materialization</summary>
 
 | Layer | Model | Grain | Materialization |
 |---|---|---|---|
@@ -79,7 +94,12 @@ Models, with grain and materialization:
 
 In the `prod` target, staging lands in `ANALYTICS.STAGING` and marts in `ANALYTICS.MARTS`. Any other target prefixes these schemas with its own `schema` setting.
 
+</details>
+
 ## Engineering choices
+
+<details>
+<summary>Ten design decisions and why</summary>
 
 | Decision | Why |
 |---|---|
@@ -96,7 +116,14 @@ In the `prod` target, staging lands in `ANALYTICS.STAGING` and marts in `ANALYTI
 
 Longer write-up: [docs/design-notes.md](docs/design-notes.md).
 
+</details>
+
 ## Testing and CI
+
+52 data tests, a static CI on every push and a manual full build on Snowflake, all green. Full build of 64 nodes in about 19 s on an XSMALL warehouse.
+
+<details>
+<summary>Tests, workflows and security details</summary>
 
 There are 52 data tests: 46 generic tests declared in the `schema.yml` files (30 `not_null`, 9 `unique`, 4 `relationships`, 3 `accepted_values`) and 6 singular tests in `tests/`. Count method: one line per generic test entry in `models/*/schema.yml`, plus the number of `.sql` files in `tests/`.
 
@@ -118,7 +145,12 @@ Measured on an XSMALL warehouse: full build of 64 nodes in about 19 s, increment
 
 CI connects with key-pair authentication as `DBT_CI_USER`, using `DBT_CI_ROLE`, a least-privilege role defined in [setup/snowflake_ci_role.sql](setup/snowflake_ci_role.sql).
 
+</details>
+
 ## Run it yourself
+
+<details>
+<summary>Setup, profile and commands</summary>
 
 Prerequisites: Python 3.11 and a Snowflake account (a free trial is enough).
 
@@ -167,7 +199,12 @@ There is no `packages.yml`, so `dbt deps` is not needed.
 
 Power BI: open `Dashboard.pbip` in Power BI Desktop and set the `SnowflakeServer` parameter to your own Snowflake host.
 
+</details>
+
 ## Known limitations
+
+<details>
+<summary>What a production version would change</summary>
 
 These are deliberate choices for a single-sandbox project. For each, what a production version would do.
 
@@ -176,6 +213,8 @@ These are deliberate choices for a single-sandbox project. For each, what a prod
 - **Loss-making products.** `agg_product_margin_abc` does not isolate products with a negative total margin, which sort last and can nudge the tail of the classification. Production: flag them as a separate class.
 - **No slim CI, no deployment job.** There is a single sandbox account. Production: state-based slim CI on pull requests and a scheduled deployment job with separate dev and prod accounts or environments.
 - **Power BI storage mode.** The fact, the three dimensions and the two aggregates (`FCT_SALES`, `DIM_CUSTOMER`, `DIM_PRODUCTS`, `DIM_DATE`, `AGG_PRODUCT_MARGIN_ABC`, `AGG_MARGIN_MONTHLY`) are in DirectQuery against Snowflake. Only the calculated tables and measures (`Bridge`, `Cost inflation %`, `_Measures`) are in import mode. Every visual therefore queries the warehouse; production would consider import or aggregations for the high-traffic pages.
+
+</details>
 
 ## Contact
 
