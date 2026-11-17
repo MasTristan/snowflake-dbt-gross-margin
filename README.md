@@ -98,7 +98,7 @@ Longer write-up: [docs/design-notes.md](docs/design-notes.md).
 
 ## Testing and CI
 
-There are 51 data tests: 45 generic tests declared in the `schema.yml` files (29 `not_null`, 9 `unique`, 4 `relationships`, 3 `accepted_values`) and 6 singular tests in `tests/`. Count method: one line per generic test entry in `models/*/schema.yml`, plus the number of `.sql` files in `tests/`.
+There are 52 data tests: 46 generic tests declared in the `schema.yml` files (30 `not_null`, 9 `unique`, 4 `relationships`, 3 `accepted_values`) and 6 singular tests in `tests/`. Count method: one line per generic test entry in `models/*/schema.yml`, plus the number of `.sql` files in `tests/`.
 
 Singular tests cover:
 
@@ -114,7 +114,7 @@ Two GitHub Actions workflows:
 - `ci.yml` runs on every pull request and push to `main`. It needs no Snowflake account: a guard fails the build if a Snowflake account identifier is committed, then `dbt parse --warn-error` checks refs, YAML and test configuration.
 - `dbt_build.yml` is triggered manually. It runs a full `dbt build` in an isolated `dbt_ci_pr_*` schema, then a second pass on `fct_sales+` to exercise the incremental path, then drops the CI schemas. It is manual because the Snowflake account is a time-limited trial, so it is not wired to pull requests.
 
-Measured on an XSMALL warehouse: full build of 63 nodes in about 19 s, incremental pass on `fct_sales+` in about 15 s, 0 failures.
+Measured on an XSMALL warehouse: full build of 64 nodes in about 19 s, incremental pass on `fct_sales+` in about 15 s, 0 failures.
 
 CI connects with key-pair authentication as `DBT_CI_USER`, using `DBT_CI_ROLE`, a least-privilege role defined in [setup/snowflake_ci_role.sql](setup/snowflake_ci_role.sql).
 
