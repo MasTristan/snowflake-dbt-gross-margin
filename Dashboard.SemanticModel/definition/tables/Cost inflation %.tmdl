@@ -1,0 +1,26 @@
+table 'Cost inflation %'
+	lineageTag: 6d4f47de-8e1b-4a5d-a5a2-176702c6e772
+
+	measure 'Cost inflation % Value' = SELECTEDVALUE('Cost inflation %'[Cost inflation %])
+		formatString: 0
+		lineageTag: bf25ca57-c3a2-4320-9542-122e6c60417c
+
+	column 'Cost inflation %'
+		formatString: 0
+		lineageTag: c9ee7765-4650-4ada-a37a-76cd9d0e828e
+		summarizeBy: none
+		sourceColumn: [Value]
+
+		extendedProperty ParameterMetadata =
+				{
+				  "version": 0
+				}
+
+		annotation SummarizationSetBy = User
+
+	partition 'Cost inflation %' = calculated
+		mode: import
+		source = GENERATESERIES(0, 50, 5)
+
+	annotation PBI_Id = cb8f660106dc4b70a28b5aead31ad8fd
+

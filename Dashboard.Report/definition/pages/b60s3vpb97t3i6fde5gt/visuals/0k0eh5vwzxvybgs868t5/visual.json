@@ -1,0 +1,53 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.8.0/schema.json",
+  "name": "0k0eh5vwzxvybgs868t5",
+  "position": {
+    "x": 958,
+    "y": 220,
+    "z": 9,
+    "width": 306,
+    "height": 128
+  },
+  "visual": {
+    "visualType": "slicer",
+    "query": {
+      "queryState": {
+        "Values": {
+          "projections": [
+            {
+              "field": {
+                "Column": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "Cost inflation %"
+                    }
+                  },
+                  "Property": "Cost inflation %"
+                }
+              },
+              "queryRef": "Cost inflation %.Cost inflation %",
+              "nativeQueryRef": "Cost inflation %",
+              "active": true
+            }
+          ]
+        }
+      }
+    },
+    "objects": {
+      "data": [
+        {
+          "properties": {
+            "mode": {
+              "expr": {
+                "Literal": {
+                  "Value": "'Dropdown'"
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    "drillFilterOtherVisuals": true
+  }
+}

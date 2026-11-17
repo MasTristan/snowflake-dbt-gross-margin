@@ -1,0 +1,104 @@
+table _Measures
+	lineageTag: 37426d20-d52a-4948-a0af-aeea4b8a7328
+
+	measure 'Total Gross Revenue' = SUM(fct_sales[gross_revenue])
+		lineageTag: 45fd4268-83f1-4ff0-bce0-3dac1579c384
+
+	measure 'Total Gross Cost' = SUM(fct_sales[gross_cost])
+		lineageTag: f5fac42b-0b8f-4d0f-95f8-59dea047c8fb
+
+	measure 'Total Gross Margin' = SUM(fct_sales[gross_margin])
+		lineageTag: 162d2460-d39e-4eb8-a9cb-0ca41c2cc2ad
+
+	measure 'Gross Margin %' =
+			
+			DIVIDE(
+			    [Total Gross Margin],
+			    [Total Gross Revenue],
+			    0
+			)
+		formatString: 0.00%;-0.00%;0.00%
+		lineageTag: 93202677-e1af-4135-93c3-12293b909ee4
+
+	measure 'Margin Contribution %' = DIVIDE([Total Gross Margin], CALCULATE([Total Gross Margin], ALLSELECTED()))
+		formatString: 0.00%;-0.00%;0.00%
+		lineageTag: cbb5bbe9-6a91-42cf-9c98-4c98ece2d9de
+
+	measure 'Product Margin Rank' = RANKX(ALL(dim_products[part_key]), [Total Gross Margin], , DESC, DENSE)
+		formatString: 0
+		lineageTag: 36cbb0cf-5056-4396-9bcb-ab6af8244c99
+
+	measure 'A-class product count' = CALCULATE(DISTINCTCOUNT(agg_product_margin_abc[part_key]), agg_product_margin_abc[abc_class] = "A")
+		lineageTag: 790c5b83-eb32-4b3c-9462-b6630f1a2757
+
+	measure 'Margin YTD' = TOTALYTD([Total Gross Margin], DIM_DATE[DATE_DAY])
+		lineageTag: c2e8e0ec-1ca8-4110-bc2b-c76f9164824f
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'Margin YoY %' =
+			
+			VAR lastM = CALCULATE(MAX(DIM_DATE[MONTH_START]), DIM_DATE[IS_COMPLETE_MONTH] = TRUE())
+			VAR cur = CALCULATE([Total Gross Margin], REMOVEFILTERS(DIM_DATE), DIM_DATE[MONTH_START] = lastM)
+			VAR py = CALCULATE([Total Gross Margin], REMOVEFILTERS(DIM_DATE), DIM_DATE[MONTH_START] = EDATE(lastM, -12))
+			RETURN DIVIDE(cur - py, py)
+		formatString: 0.00%;-0.00%;0.00%
+		lineageTag: 31220a9f-6d56-48d5-8260-d73552eaf143
+
+	measure 'Margin MoM %' =
+			
+			VAR lastM = CALCULATE(MAX(DIM_DATE[MONTH_START]), DIM_DATE[IS_COMPLETE_MONTH] = TRUE())
+			VAR cur = CALCULATE([Total Gross Margin], REMOVEFILTERS(DIM_DATE), DIM_DATE[MONTH_START] = lastM)
+			VAR pm = CALCULATE([Total Gross Margin], REMOVEFILTERS(DIM_DATE), DIM_DATE[MONTH_START] = EDATE(lastM, -1))
+			RETURN DIVIDE(cur - pm, pm)
+		formatString: 0.00%;-0.00%;0.00%
+		lineageTag: 20a2d297-7eb5-4abe-aeaf-239a23ff7fbf
+
+	measure 'Adjusted Gross Margin' = [Total Gross Margin] - [Total Gross Cost] * DIVIDE('Cost inflation %'[Cost inflation % Value], 100)
+		lineageTag: 150679b3-06b3-47f1-82d9-053483608f97
+
+	measure 'Adjusted Margin %' = DIVIDE([Adjusted Gross Margin], [Total Gross Revenue])
+		formatString: 0.00%;-0.00%;0.00%
+		lineageTag: a70e5606-e266-4dfe-9d06-ed6fda335d7b
+
+	measure 'ABC Total Margin' = SUM(agg_product_margin_abc[TOTAL_GROSS_MARGIN])
+		lineageTag: 3f9a1c72-0b44-4e51-9a2e-7c8d6e5f0a11
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'Margin B' = DIVIDE([Total Gross Margin], 1000000000)
+		formatString: 0.0
+		lineageTag: 7c1e2d93-4a5b-4c6d-8e9f-0a1b2c3d4e5f
+
+	measure 'Target Margin %' = 0.6
+		formatString: 0.0%
+		lineageTag: a1b2c3d4-1111-4222-8333-444455556661
+
+	measure 'Margin vs Target' = [Gross Margin %] - [Target Margin %]
+		formatString: +0.0%;-0.0%
+		lineageTag: a1b2c3d4-1111-4222-8333-444455556662
+
+	measure 'Brands below target' = COUNTROWS(FILTER(VALUES(dim_products[BRAND]), [Total Gross Revenue] > 0 && [Gross Margin %] < [Target Margin %])) + 0
+		formatString: 0
+		lineageTag: a1b2c3d4-1111-4222-8333-444455556663
+
+	measure 'Bridge Value' = SWITCH(SELECTEDVALUE(Bridge[Step]), "Revenue", [Total Gross Revenue], "Cost", -[Total Gross Cost])
+		lineageTag: a1b2c3d4-1111-4222-8333-444455556664
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column Column
+		formatString: 0
+		lineageTag: 83dd0aeb-8ead-4d91-9a3f-cc5c83419005
+		summarizeBy: sum
+		isNameInferred
+		sourceColumn: [Column]
+
+		annotation SummarizationSetBy = Automatic
+
+	partition _Measures = calculated
+		mode: import
+		source = Row("Column", BLANK())
+
+	annotation PBI_Id = 4cf23f8d92434db98e88c73282c658ce
+

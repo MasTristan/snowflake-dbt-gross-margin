@@ -1,0 +1,106 @@
+table DIM_DATE
+	lineageTag: 67dc12be-1403-4851-948c-79360af3532e
+
+	column DATE_DAY
+		dataType: dateTime
+		formatString: Long Date
+		sourceProviderType: date
+		lineageTag: 2218db4f-c768-429b-a52a-67a699ff3342
+		summarizeBy: none
+		sourceColumn: DATE_DAY
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation UnderlyingDateTimeDataType = Date
+
+	column YEAR
+		dataType: int64
+		sourceProviderType: decimal(4, 0)
+		lineageTag: ab1570ce-4e42-47a3-a2fa-06475d58a6f0
+		summarizeBy: none
+		sourceColumn: YEAR
+
+		changedProperty = DataType
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column MONTH
+		dataType: double
+		sourceProviderType: decimal(2, 0)
+		lineageTag: 9fe65e51-034f-4a27-bca1-6a948ae40460
+		summarizeBy: none
+		sourceColumn: MONTH
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column DAY
+		dataType: double
+		sourceProviderType: decimal(2, 0)
+		lineageTag: 7172b612-f872-406e-a22f-3b5c00dc6b01
+		summarizeBy: none
+		sourceColumn: DAY
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column MONTH_NAME
+		dataType: string
+		sourceProviderType: nvarchar(16777216)
+		lineageTag: aaf39634-643a-456d-901d-193664f9ca9b
+		summarizeBy: none
+		sourceColumn: MONTH_NAME
+
+		annotation SummarizationSetBy = Automatic
+
+	column QUARTER
+		dataType: int64
+		sourceProviderType: decimal(2, 0)
+		lineageTag: 4ce07412-0f2a-4e3c-b921-d905bc69de46
+		summarizeBy: none
+		sourceColumn: QUARTER
+
+		changedProperty = DataType
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column MONTH_START
+		dataType: dateTime
+		formatString: Long Date
+		sourceProviderType: date
+		lineageTag: f7ffc772-a6b7-473c-8d8f-2a13acf17378
+		summarizeBy: none
+		sourceColumn: MONTH_START
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation UnderlyingDateTimeDataType = Date
+
+	column IS_COMPLETE_MONTH
+		dataType: boolean
+		sourceProviderType: boolean
+		lineageTag: cab73591-9da3-4ad3-bdd9-85589d013c14
+		summarizeBy: none
+		sourceColumn: IS_COMPLETE_MONTH
+
+		annotation SummarizationSetBy = Automatic
+
+	partition DIM_DATE = m
+		mode: directQuery
+		source =
+				let
+				    Source = Snowflake.Databases(SnowflakeServer,"DBT_WH",[Implementation="2.0"]),
+				    ANALYTICS_Database = Source{[Name="ANALYTICS",Kind="Database"]}[Data],
+				    MARTS_Schema = ANALYTICS_Database{[Name="MARTS",Kind="Schema"]}[Data],
+				    DIM_DATE_Table = MARTS_Schema{[Name="DIM_DATE",Kind="Table"]}[Data]
+				in
+				    DIM_DATE_Table
+
+	annotation PBI_ResultType = Table
+

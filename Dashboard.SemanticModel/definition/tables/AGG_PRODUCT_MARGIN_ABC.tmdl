@@ -1,0 +1,87 @@
+table AGG_PRODUCT_MARGIN_ABC
+	lineageTag: dcc77f14-1916-4de9-998f-22021d8ce42c
+
+	column PART_KEY
+		dataType: double
+		sourceProviderType: decimal(38, 0)
+		lineageTag: 38fd13a4-9bec-485f-bff1-7b7056aff2d6
+		summarizeBy: sum
+		sourceColumn: PART_KEY
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column MANUFACTURER
+		dataType: string
+		sourceProviderType: nvarchar(25)
+		lineageTag: f7e4126e-c563-4e20-aa6b-3bcdda6dcd89
+		summarizeBy: none
+		sourceColumn: MANUFACTURER
+
+		annotation SummarizationSetBy = Automatic
+
+	column BRAND
+		dataType: string
+		sourceProviderType: nvarchar(10)
+		lineageTag: 21845b71-c711-4d3a-aeec-b06f152636b1
+		summarizeBy: none
+		sourceColumn: BRAND
+
+		annotation SummarizationSetBy = Automatic
+
+	column TOTAL_GROSS_MARGIN
+		dataType: double
+		sourceProviderType: decimal(38, 4)
+		lineageTag: 8e247229-6e3f-4f89-803e-e81a24574717
+		summarizeBy: sum
+		sourceColumn: TOTAL_GROSS_MARGIN
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column CUMULATIVE_MARGIN
+		dataType: double
+		sourceProviderType: decimal(38, 4)
+		lineageTag: ad6d2032-9cf0-4a55-9fd7-fb373e77736d
+		summarizeBy: sum
+		sourceColumn: CUMULATIVE_MARGIN
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column CUMULATIVE_MARGIN_PCT
+		dataType: double
+		sourceProviderType: decimal(38, 4)
+		lineageTag: 9ecb1f7b-234d-466b-9618-395c0dfb531f
+		summarizeBy: sum
+		sourceColumn: CUMULATIVE_MARGIN_PCT
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column ABC_CLASS
+		dataType: string
+		sourceProviderType: nvarchar(1)
+		lineageTag: fafe1119-79b9-4329-a571-7ff6aaa31357
+		summarizeBy: none
+		sourceColumn: ABC_CLASS
+
+		annotation SummarizationSetBy = Automatic
+
+	partition AGG_PRODUCT_MARGIN_ABC = m
+		mode: directQuery
+		source =
+				let
+				    Source = Snowflake.Databases(SnowflakeServer,"DBT_WH",[Implementation="2.0"]),
+				    ANALYTICS_Database = Source{[Name="ANALYTICS",Kind="Database"]}[Data],
+				    MARTS_Schema = ANALYTICS_Database{[Name="MARTS",Kind="Schema"]}[Data],
+				    AGG_PRODUCT_MARGIN_ABC_Table = MARTS_Schema{[Name="AGG_PRODUCT_MARGIN_ABC",Kind="Table"]}[Data]
+				in
+				    AGG_PRODUCT_MARGIN_ABC_Table
+
+	annotation PBI_ResultType = Table
+

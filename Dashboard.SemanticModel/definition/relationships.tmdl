@@ -1,0 +1,12 @@
+relationship 8e58a8cf-8c0e-dda9-cb21-7be9548f7bb0
+	fromColumn: FCT_SALES.CUSTOMER_KEY
+	toColumn: DIM_CUSTOMER.CUSTOMER_KEY
+
+relationship 502de1b5-5aec-04d1-65ab-23c9fa726192
+	fromColumn: FCT_SALES.PART_KEY
+	toColumn: DIM_PRODUCTS.PART_KEY
+
+relationship 50ca0797-ca8a-ff97-956c-a3354d81ef2a
+	fromColumn: FCT_SALES.SHIP_DATE
+	toColumn: DIM_DATE.DATE_DAY
+

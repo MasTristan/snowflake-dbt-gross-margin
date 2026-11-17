@@ -1,0 +1,157 @@
+table FCT_SALES
+	lineageTag: ae952214-5d81-449a-83b0-90fd8d88a79f
+
+	column ORDER_KEY
+		dataType: double
+		isHidden
+		sourceProviderType: decimal(38, 0)
+		lineageTag: 6b5d281d-b057-4faa-b59f-396ca6c6764b
+		summarizeBy: sum
+		sourceColumn: ORDER_KEY
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column LINE_NUMBER
+		dataType: double
+		sourceProviderType: decimal(38, 0)
+		lineageTag: 4d913223-7566-4b07-b7b8-3bf1a0ba2fca
+		summarizeBy: sum
+		sourceColumn: LINE_NUMBER
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column CUSTOMER_KEY
+		dataType: double
+		isHidden
+		sourceProviderType: decimal(38, 0)
+		lineageTag: e8290c32-bfd2-4bc2-9d97-414c3e4e837b
+		summarizeBy: none
+		sourceColumn: CUSTOMER_KEY
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column PART_KEY
+		dataType: double
+		isHidden
+		sourceProviderType: decimal(38, 0)
+		lineageTag: 577ce04f-1b73-40bc-bb71-420127f0194c
+		summarizeBy: none
+		sourceColumn: PART_KEY
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column SHIP_DATE
+		dataType: dateTime
+		formatString: Long Date
+		sourceProviderType: date
+		lineageTag: 5f8f64da-b3c0-4e84-80f9-15b5821a4e2a
+		summarizeBy: none
+		sourceColumn: SHIP_DATE
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation UnderlyingDateTimeDataType = Date
+
+	column ORDER_DATE
+		dataType: dateTime
+		formatString: Long Date
+		sourceProviderType: date
+		lineageTag: c893b40c-b7d0-4a2d-ac25-1cb2568fee6d
+		summarizeBy: none
+		sourceColumn: ORDER_DATE
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation UnderlyingDateTimeDataType = Date
+
+	column ORDER_STATUS
+		dataType: string
+		sourceProviderType: nvarchar(1)
+		lineageTag: 31b3f241-1621-4b70-9ea4-b4a2c1393acb
+		summarizeBy: none
+		sourceColumn: ORDER_STATUS
+
+		annotation SummarizationSetBy = Automatic
+
+	column QUANTITY
+		dataType: double
+		sourceProviderType: decimal(12, 2)
+		lineageTag: 53273af5-a6e7-4dc2-ac8e-63036dc23428
+		summarizeBy: sum
+		sourceColumn: QUANTITY
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column GROSS_REVENUE
+		dataType: double
+		sourceProviderType: decimal(25, 4)
+		lineageTag: 9afb0af1-6345-434b-8d83-ecac74b7a313
+		summarizeBy: sum
+		sourceColumn: GROSS_REVENUE
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column GROSS_COST
+		dataType: double
+		sourceProviderType: decimal(24, 4)
+		lineageTag: 1bc92569-ecb3-4362-b106-50026d716dc6
+		summarizeBy: sum
+		sourceColumn: GROSS_COST
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column GROSS_MARGIN
+		dataType: double
+		sourceProviderType: decimal(26, 4)
+		lineageTag: 203aba58-ffca-44f6-8f9d-c0b2a25d5c0a
+		summarizeBy: sum
+		sourceColumn: GROSS_MARGIN
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column GROSS_MARGIN_PCT
+		dataType: double
+		sourceProviderType: decimal(36, 10)
+		lineageTag: 583db929-8cc4-4d3e-85dc-9d7c9ab64044
+		summarizeBy: sum
+		sourceColumn: GROSS_MARGIN_PCT
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	partition FCT_SALES = m
+		mode: directQuery
+		source =
+				let
+				    Source = Snowflake.Databases(SnowflakeServer,"DBT_WH",[Implementation="2.0"]),
+				    ANALYTICS_Database = Source{[Name="ANALYTICS",Kind="Database"]}[Data],
+				    MARTS_Schema = ANALYTICS_Database{[Name="MARTS",Kind="Schema"]}[Data],
+				    FCT_SALES_Table = MARTS_Schema{[Name="FCT_SALES",Kind="Table"]}[Data]
+				in
+				    FCT_SALES_Table
+
+	annotation PBI_ResultType = Table
+

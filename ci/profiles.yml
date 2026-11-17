@@ -1,0 +1,15 @@
+# CI-only profile: every value comes from environment variables (GitHub secrets / workflow env).
+# Key-pair auth: DBT_SNOWFLAKE_PRIVATE_KEY holds the PKCS8 PEM text (unencrypted key).
+ae_tpf_project:
+  target: ci
+  outputs:
+    ci:
+      type: snowflake
+      account: "{{ env_var('DBT_SNOWFLAKE_ACCOUNT') }}"
+      user: "{{ env_var('DBT_SNOWFLAKE_USER') }}"
+      private_key: "{{ env_var('DBT_SNOWFLAKE_PRIVATE_KEY') }}"
+      role: "{{ env_var('DBT_SNOWFLAKE_ROLE') }}"
+      database: "{{ env_var('DBT_SNOWFLAKE_DATABASE') }}"
+      warehouse: "{{ env_var('DBT_SNOWFLAKE_WAREHOUSE') }}"
+      schema: "{{ env_var('DBT_SNOWFLAKE_SCHEMA') }}"
+      threads: 4

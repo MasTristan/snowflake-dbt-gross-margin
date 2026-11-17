@@ -1,0 +1,130 @@
+version: 2
+
+models:
+  - name: dim_customer
+    description: "Customer dimension with geography and a data-driven margin value tier."
+    columns:
+      - name: customer_key
+        data_tests:
+          - unique
+          - not_null
+      - name: customer_margin_quintile
+        description: "1 (highest total gross margin) to 5 (lowest), ntile over all customers."
+        data_tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: [1, 2, 3, 4, 5]
+      - name: customer_value_tier
+        description: "Readable label for the margin quintile, used for slicing in BI."
+        data_tests:
+          - not_null
+
+  - name: dim_products
+    description: "Product dimension."
+    columns:
+      - name: part_key
+        data_tests:
+          - unique
+          - not_null
+      - name: part_name
+        description: "Product display name, used as the BI-facing label."
+        data_tests:
+          - not_null
+
+  - name: dim_date
+    description: "Date dimension."
+    columns:
+      - name: date_day
+        data_tests:
+          - unique
+          - not_null
+      - name: is_complete_month
+        description: "True for months in the steady-state window: starting after the first orders have had time to ship (min order_date + max ship lag) and ending before order intake stops (max order_date). Ramp-up and run-off months are false."
+        data_tests:
+          - not_null
+
+  - name: fct_sales
+    description: "Sales facts, one row per order line, with gross margin. Grain uniqueness (order_key + line_number) is enforced by tests/assert_unique_fct_sales_grain.sql."
+    columns:
+      - name: order_key
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('stg_orders')
+                field: order_key
+      - name: line_number
+        description: "Line number within an order, second half of the grain."
+        data_tests:
+          - not_null
+      - name: customer_key
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('dim_customer')
+                field: customer_key
+      - name: part_key
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('dim_products')
+                field: part_key
+      - name: ship_date
+        description: "Ship date, joins to the date dimension."
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('dim_date')
+                field: date_day
+      - name: gross_revenue
+        description: "Net revenue at the order-line grain."
+        data_tests:
+          - not_null
+      - name: gross_cost
+        description: "Supply cost times quantity. NULL here means the partsupp join missed."
+        data_tests:
+          - not_null
+      - name: gross_margin
+        description: "gross_revenue minus gross_cost."
+        data_tests:
+          - not_null
+
+  - name: agg_product_margin_abc
+    description: "Products ranked by total gross margin with cumulative share and ABC (Pareto) class."
+    columns:
+      - name: part_key
+        data_tests:
+          - unique
+          - not_null
+      - name: total_gross_margin
+        description: "Sum of gross_margin for the product."
+        data_tests:
+          - not_null
+      - name: abc_class
+        description: "A up to 80% of cumulative margin, B up to 95%, C the tail."
+        data_tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: ['A', 'B', 'C']
+
+  - name: agg_margin_monthly
+    description: "Monthly gross margin on a gapless calendar month spine, with MoM, YoY and a 3-month moving average."
+    columns:
+      - name: month_start
+        description: "First day of the month, one row per month."
+        data_tests:
+          - unique
+          - not_null
+      - name: total_gross_margin
+        description: "Sum of gross_margin for the month."
+        data_tests:
+          - not_null
+      - name: is_complete_month
+        description: "Inherited from dim_date. False for ramp-up and run-off months, which should be excluded from KPIs and trends."
+        data_tests:
+          - not_null

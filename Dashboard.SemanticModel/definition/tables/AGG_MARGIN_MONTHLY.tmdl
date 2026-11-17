@@ -1,0 +1,113 @@
+table AGG_MARGIN_MONTHLY
+	lineageTag: 23f20203-62cf-4860-a5ed-cc431626343d
+
+	column MONTH_START
+		dataType: dateTime
+		formatString: Long Date
+		sourceProviderType: date
+		lineageTag: 1f5a279e-4624-4d52-8b54-e5bf79c8a8ed
+		summarizeBy: none
+		sourceColumn: MONTH_START
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation UnderlyingDateTimeDataType = Date
+
+	column TOTAL_GROSS_MARGIN
+		dataType: double
+		sourceProviderType: decimal(38, 4)
+		lineageTag: 0ebf4843-cdd0-4a37-ba13-9c29ff9735ff
+		summarizeBy: sum
+		sourceColumn: TOTAL_GROSS_MARGIN
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column TOTAL_GROSS_REVENUE
+		dataType: double
+		sourceProviderType: decimal(37, 4)
+		lineageTag: ecc0bd62-fca5-4d68-9f07-41e0c27d167f
+		summarizeBy: sum
+		sourceColumn: TOTAL_GROSS_REVENUE
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column PREV_MONTH_MARGIN
+		dataType: double
+		sourceProviderType: decimal(38, 4)
+		lineageTag: 9859f292-4078-4750-992b-b52702d7f7b3
+		summarizeBy: sum
+		sourceColumn: PREV_MONTH_MARGIN
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column PREV_YEAR_MARGIN
+		dataType: double
+		sourceProviderType: decimal(38, 4)
+		lineageTag: 52b00087-b22c-47b5-bc5d-c53f5b1a8412
+		summarizeBy: sum
+		sourceColumn: PREV_YEAR_MARGIN
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column MOM_MARGIN_PCT
+		dataType: double
+		sourceProviderType: decimal(38, 10)
+		lineageTag: 97f31eb8-97d0-4c49-9825-0198bcc92388
+		summarizeBy: sum
+		sourceColumn: MOM_MARGIN_PCT
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column YOY_MARGIN_PCT
+		dataType: double
+		formatString: 0.00\ %;-0.00\ %;0.00\ %
+		sourceProviderType: decimal(38, 10)
+		lineageTag: 42774580-ba4f-477f-a272-306dbacceefd
+		summarizeBy: sum
+		sourceColumn: YOY_MARGIN_PCT
+
+		annotation SummarizationSetBy = Automatic
+
+	column MARGIN_3MO_MOVING_AVG
+		dataType: double
+		sourceProviderType: decimal(38, 7)
+		lineageTag: 0d253131-0c45-49ac-9bdf-2ee504712808
+		summarizeBy: sum
+		sourceColumn: MARGIN_3MO_MOVING_AVG
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column IS_COMPLETE_MONTH
+		dataType: boolean
+		sourceProviderType: boolean
+		lineageTag: fccb357a-2819-4d18-a427-48749f450001
+		summarizeBy: none
+		sourceColumn: IS_COMPLETE_MONTH
+
+		annotation SummarizationSetBy = Automatic
+
+	partition AGG_MARGIN_MONTHLY = m
+		mode: directQuery
+		source =
+				let
+				    Source = Snowflake.Databases(SnowflakeServer,"DBT_WH",[Implementation="2.0"]),
+				    ANALYTICS_Database = Source{[Name="ANALYTICS",Kind="Database"]}[Data],
+				    MARTS_Schema = ANALYTICS_Database{[Name="MARTS",Kind="Schema"]}[Data],
+				    AGG_MARGIN_MONTHLY_Table = MARTS_Schema{[Name="AGG_MARGIN_MONTHLY",Kind="Table"]}[Data]
+				in
+				    AGG_MARGIN_MONTHLY_Table
+
+	annotation PBI_ResultType = Table
+

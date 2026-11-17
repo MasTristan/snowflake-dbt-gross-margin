@@ -1,0 +1,65 @@
+# Full build and tests against Snowflake in an isolated, disposable schema.
+# Manual trigger only: the sandbox account is a time-limited trial, so this job
+# is not wired to PRs. Static checks run on every PR in ci.yml.
+name: dbt build (Snowflake)
+
+on:
+  workflow_dispatch:
+
+concurrency:
+  group: dbt-ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  dbt-build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    env:
+      DBT_SNOWFLAKE_ACCOUNT: ${{ secrets.DBT_SNOWFLAKE_ACCOUNT }}
+      DBT_SNOWFLAKE_USER: ${{ secrets.DBT_SNOWFLAKE_USER }}
+      DBT_SNOWFLAKE_PRIVATE_KEY: ${{ secrets.DBT_SNOWFLAKE_PRIVATE_KEY }}
+      DBT_SNOWFLAKE_ROLE: DBT_CI_ROLE
+      DBT_SNOWFLAKE_WAREHOUSE: DBT_WH
+      DBT_SNOWFLAKE_DATABASE: ANALYTICS
+      DBT_SNOWFLAKE_SCHEMA: dbt_ci_pr_${{ github.event.number || github.run_id }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Guard against committed Snowflake account identifiers
+        run: |
+          if git grep -nE "[a-z0-9]+-[a-z0-9]+\.snowflakecomputing\.com"; then
+            echo "Real Snowflake account identifier found in the repository." >&2
+            exit 1
+          fi
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: dbt debug
+        run: dbt debug --profiles-dir ci
+
+      - name: dbt build (full)
+        run: dbt build --profiles-dir ci
+
+      - name: dbt build (incremental path)
+        run: dbt build --profiles-dir ci -s fct_sales+
+
+      - name: Drop CI schemas
+        if: always()
+        run: dbt run-operation drop_ci_schemas --profiles-dir ci
+
+      - name: Upload run results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: run_results
+          path: target/run_results.json
+          if-no-files-found: warn

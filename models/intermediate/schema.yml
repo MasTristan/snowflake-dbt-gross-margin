@@ -1,0 +1,10 @@
+version: 2
+
+models:
+  - name: int_customer_margin
+    description: "Ephemeral rollup: total gross margin, revenue and line count per customer. Feeds the value tier in dim_customer."
+    columns:
+      - name: customer_key
+        description: "Customer identifier, one row per customer with at least one sale."
+      - name: total_gross_margin
+        description: "Sum of gross_margin over the customer's order lines."

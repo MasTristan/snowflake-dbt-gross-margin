@@ -1,0 +1,21 @@
+table Bridge
+	lineageTag: b1234567-0000-4a00-8b00-aabbccdd0001
+
+	column Step
+		dataType: string
+		lineageTag: b1234567-0000-4a00-8b00-aabbccdd0002
+		summarizeBy: none
+		sourceColumn: [Step]
+		sortByColumn: Ord
+
+	column Ord
+		dataType: int64
+		formatString: 0
+		lineageTag: b1234567-0000-4a00-8b00-aabbccdd0003
+		summarizeBy: none
+		sourceColumn: [Ord]
+
+	partition Bridge = calculated
+		mode: import
+		source = DATATABLE("Step", STRING, "Ord", INTEGER, {{"Revenue", 1}, {"Cost", 2}})
+

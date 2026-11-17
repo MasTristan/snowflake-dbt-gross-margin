@@ -1,0 +1,94 @@
+table DIM_CUSTOMER
+	lineageTag: 96814922-cf91-45e3-b490-070d044666a1
+
+	column CUSTOMER_KEY
+		dataType: double
+		sourceProviderType: decimal(38, 0)
+		lineageTag: d4408e8a-c899-42ee-8f62-4f6e52260802
+		summarizeBy: none
+		sourceColumn: CUSTOMER_KEY
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column CUSTOMER_NAME_HASHED
+		dataType: string
+		sourceProviderType: nvarchar(128)
+		lineageTag: 9a549b84-b08f-424c-aee4-c33bf25dbf08
+		summarizeBy: none
+		sourceColumn: CUSTOMER_NAME_HASHED
+
+		annotation SummarizationSetBy = Automatic
+
+	column MARKET_SEGMENT
+		dataType: string
+		sourceProviderType: nvarchar(10)
+		lineageTag: 777d2778-4390-4e37-be19-4854bf146f96
+		summarizeBy: none
+		sourceColumn: MARKET_SEGMENT
+
+		annotation SummarizationSetBy = Automatic
+
+	column NATION_NAME
+		dataType: string
+		sourceProviderType: nvarchar(25)
+		lineageTag: 67f97afa-ba5b-48ca-b80c-04b0b80eb754
+		summarizeBy: none
+		sourceColumn: NATION_NAME
+
+		annotation SummarizationSetBy = Automatic
+
+	column REGION_NAME
+		dataType: string
+		sourceProviderType: nvarchar(25)
+		lineageTag: aba544a9-a625-4119-b5a1-78e95bf71aca
+		summarizeBy: none
+		sourceColumn: REGION_NAME
+
+		annotation SummarizationSetBy = Automatic
+
+	column TOTAL_GROSS_MARGIN
+		dataType: double
+		sourceProviderType: decimal(38, 4)
+		lineageTag: c8b59ecf-df8e-420e-a1a0-7f78bb7837b0
+		summarizeBy: none
+		sourceColumn: TOTAL_GROSS_MARGIN
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column CUSTOMER_MARGIN_QUINTILE
+		dataType: double
+		sourceProviderType: decimal(18, 0)
+		lineageTag: b167c920-c330-435c-a524-ed451512945c
+		summarizeBy: none
+		sourceColumn: CUSTOMER_MARGIN_QUINTILE
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column CUSTOMER_VALUE_TIER
+		dataType: string
+		sourceProviderType: nvarchar(16777216)
+		lineageTag: 3bde97a6-a5ef-4b61-b3c9-82efd7959fef
+		summarizeBy: none
+		sourceColumn: CUSTOMER_VALUE_TIER
+
+		annotation SummarizationSetBy = Automatic
+
+	partition DIM_CUSTOMER = m
+		mode: directQuery
+		source =
+				let
+				    Source = Snowflake.Databases(SnowflakeServer,"DBT_WH",[Implementation="2.0"]),
+				    ANALYTICS_Database = Source{[Name="ANALYTICS",Kind="Database"]}[Data],
+				    MARTS_Schema = ANALYTICS_Database{[Name="MARTS",Kind="Schema"]}[Data],
+				    DIM_CUSTOMER_Table = MARTS_Schema{[Name="DIM_CUSTOMER",Kind="Table"]}[Data]
+				in
+				    DIM_CUSTOMER_Table
+
+	annotation PBI_ResultType = Table
+

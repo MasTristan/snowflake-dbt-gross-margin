@@ -1,0 +1,26 @@
+model Model
+	culture: fr-FR
+	defaultPowerBIDataSourceVersion: powerBI_V3
+	sourceQueryCulture: fr-FR
+	dataAccessOptions
+		legacyRedirects
+		returnErrorValuesAsNull
+
+annotation __PBI_TimeIntelligenceEnabled = 1
+
+annotation PBI_QueryOrder = ["SnowflakeServer","DIM_CUSTOMER","DIM_DATE","DIM_PRODUCTS","FCT_SALES","AGG_PRODUCT_MARGIN_ABC","AGG_MARGIN_MONTHLY"]
+
+annotation PBI_ProTooling = ["DevMode"]
+
+ref table DIM_CUSTOMER
+ref table DIM_DATE
+ref table DIM_PRODUCTS
+ref table FCT_SALES
+ref table _Measures
+ref table AGG_PRODUCT_MARGIN_ABC
+ref table AGG_MARGIN_MONTHLY
+ref table 'Cost inflation %'
+ref table Bridge
+
+ref cultureInfo fr-FR
+

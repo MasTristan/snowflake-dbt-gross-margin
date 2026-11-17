@@ -1,0 +1,50 @@
+# Static checks: run on every PR and push to main, need no Snowflake account.
+# The full Snowflake build lives in dbt_build.yml and is triggered manually.
+name: ci
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  static-checks:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    # Placeholder values: dbt parse renders the profile but never opens a connection.
+    env:
+      DBT_SNOWFLAKE_ACCOUNT: placeholder
+      DBT_SNOWFLAKE_USER: placeholder
+      DBT_SNOWFLAKE_PRIVATE_KEY: placeholder
+      DBT_SNOWFLAKE_ROLE: placeholder
+      DBT_SNOWFLAKE_WAREHOUSE: placeholder
+      DBT_SNOWFLAKE_DATABASE: placeholder
+      DBT_SNOWFLAKE_SCHEMA: placeholder
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Guard against committed Snowflake account identifiers
+        run: |
+          if git grep -nE "[a-z0-9]+-[a-z0-9]+\.snowflakecomputing\.com"; then
+            echo "Real Snowflake account identifier found in the repository." >&2
+            exit 1
+          fi
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: dbt parse (project, refs, YAML and test configs)
+        run: dbt parse --profiles-dir ci --warn-error

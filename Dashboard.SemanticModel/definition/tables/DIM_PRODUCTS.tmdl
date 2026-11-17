@@ -1,0 +1,63 @@
+table DIM_PRODUCTS
+	lineageTag: e438b76c-fdbf-4ddd-8bf0-99714d0375a7
+
+	column PART_KEY
+		dataType: double
+		sourceProviderType: decimal(38, 0)
+		lineageTag: 8a95d442-6f36-48a2-a2bb-08dc8a28275e
+		summarizeBy: none
+		sourceColumn: PART_KEY
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column PART_NAME
+		dataType: string
+		sourceProviderType: nvarchar(55)
+		lineageTag: c96ec118-9ec3-4e12-b9e3-a08a73825d42
+		summarizeBy: none
+		sourceColumn: PART_NAME
+
+		annotation SummarizationSetBy = Automatic
+
+	column MANUFACTURER
+		dataType: string
+		sourceProviderType: nvarchar(25)
+		lineageTag: 861cab1b-64b9-4dab-8b21-2a08b449a2d8
+		summarizeBy: none
+		sourceColumn: MANUFACTURER
+
+		annotation SummarizationSetBy = Automatic
+
+	column BRAND
+		dataType: string
+		sourceProviderType: nvarchar(10)
+		lineageTag: 18d81276-e124-4cd9-ad8e-007a42172b01
+		summarizeBy: none
+		sourceColumn: BRAND
+
+		annotation SummarizationSetBy = Automatic
+
+	column PART_TYPE
+		dataType: string
+		sourceProviderType: nvarchar(25)
+		lineageTag: c4d7a43c-701e-43b5-b13a-4f98b96efb7d
+		summarizeBy: none
+		sourceColumn: PART_TYPE
+
+		annotation SummarizationSetBy = Automatic
+
+	partition DIM_PRODUCTS = m
+		mode: directQuery
+		source =
+				let
+				    Source = Snowflake.Databases(SnowflakeServer,"DBT_WH",[Implementation="2.0"]),
+				    ANALYTICS_Database = Source{[Name="ANALYTICS",Kind="Database"]}[Data],
+				    MARTS_Schema = ANALYTICS_Database{[Name="MARTS",Kind="Schema"]}[Data],
+				    DIM_PRODUCTS_Table = MARTS_Schema{[Name="DIM_PRODUCTS",Kind="Table"]}[Data]
+				in
+				    DIM_PRODUCTS_Table
+
+	annotation PBI_ResultType = Table
+

@@ -1,0 +1,25 @@
+
+target/
+dbt_packages/
+logs/
+.user.yml
+
+# Power BI
+*.pbix
+.render/
+**/.pbi/localSettings.json
+**/.pbi/cache.abf
+
+# dbt / Python
+profiles.yml
+!ci/profiles.yml
+.env
+.venv/
+venv/
+__pycache__/
+
+# AI instruction files (never published)
+.claude/
+CLAUDE.md
+PLAN.md
+IMPROVEMENTS.md
